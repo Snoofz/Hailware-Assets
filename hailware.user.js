@@ -1039,6 +1039,8 @@ waitForUnityInstance(() => {
 
         Log.tool("Pre-loading cheats...");
         Log.tool("Cheats were pre-loaded!");
+        let audio = new Audio("https://github.com/Snoofz/Hailware-Assets/raw/main/Hailware.ogg");
+        audio.play();
         let mainMenu = uiManager.createMenu("epicUI", "Hailware Web", "400px", "500px");
         uiManager.makeDraggable(mainMenu);
         let logo = uiManager.addLogo("https://github.com/Snoofz/Hailware-Assets/blob/main/snowly-icon.png?raw=true");
