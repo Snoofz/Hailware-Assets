@@ -53,9 +53,9 @@ class UIManager {
         this.UIContext = null;
         this.UIMenus = [];
         this.tabs = [];
-        this.notificationStack = [];
-        this.notificationHeight = 100;
-        this.notificationMargin = 10;
+        this.notificationStack = []; // Track notifications for stacking
+        this.notificationHeight = 100; // Default notification height
+        this.notificationMargin = 10; // Margin between notifications
     }
 
     getAllTabs() {
@@ -69,12 +69,12 @@ class UIManager {
         notificationContainer.style.left = '10px';
         notificationContainer.style.bottom = this.calculateNotificationBottom() + 'px';
         notificationContainer.style.transform = 'translateY(100%)';
-        notificationContainer.style.backgroundColor = '#0e0e0e';
-        notificationContainer.style.color = '#ffffff';
+        notificationContainer.style.backgroundColor = '#0e0e0e'; // Dark red background
+        notificationContainer.style.color = '#ffffff'; // White text color
         notificationContainer.style.width = '300px';
         notificationContainer.style.padding = '20px';
         notificationContainer.style.borderRadius = '8px';
-        notificationContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
+        notificationContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)'; // Darker shadow
         notificationContainer.style.zIndex = '9999';
         notificationContainer.style.transition = 'transform 0.3s ease-in-out';
 
@@ -83,13 +83,13 @@ class UIManager {
         title.style.fontSize = '22px';
         title.style.textAlign = 'center';
         title.style.marginBottom = '10px';
-        title.classList.add('rainbow-animation');
+        title.classList.add('rainbow-animation'); // Add rainbow animation class
 
         const description = document.createElement('p');
         description.textContent = descriptionText;
         description.style.fontSize = '16px';
         description.style.textAlign = 'center';
-        description.classList.add('rainbow-animation');
+        description.classList.add('rainbow-animation'); // Add rainbow animation class
 
         notificationContainer.appendChild(title);
         notificationContainer.appendChild(description);
@@ -141,10 +141,10 @@ class UIManager {
         const container = document.createElement('div');
         container.id = elementId;
         container.style.position = 'fixed';
-        container.style.backgroundColor = '#0e0e0e';
+        container.style.backgroundColor = '#0e0e0e'; // Darker red background
         container.style.borderRadius = '8px';
         container.style.padding = '20px';
-        container.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
+        container.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)'; // Darker shadow
         container.style.zIndex = '9999';
         container.style.width = width;
         container.style.height = height;
@@ -159,7 +159,7 @@ class UIManager {
 
         const title = document.createElement('h2');
         title.textContent = titleText;
-        title.style.color = '#ffffff';
+        title.style.color = '#ffffff'; // White text color
         title.style.marginBottom = '20px';
         title.style.fontSize = '22px';
         title.style.textAlign = 'center';
@@ -177,13 +177,14 @@ class UIManager {
         let offsetX, offsetY;
 
         function handleMouseDown(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent default behavior (e.g., text selection)
             const boundingRect = element.getBoundingClientRect();
             offsetX = event.clientX - boundingRect.left;
             offsetY = event.clientY - boundingRect.top;
 
             console.log(`x: ${event.clientX}, y: ${event.clientY}, Offsetx: ${offsetX}, Offsety: ${offsetY}`)
 
+            // Add event listeners for mouse move and mouse up events
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
         }
@@ -213,17 +214,18 @@ class UIManager {
         const titleBar = element.querySelector('h2');
         titleBar.addEventListener('mousedown', handleMouseDown);
 
+        // CSS to ensure smooth dragging and prevent text selection
         element.style.position = 'absolute';
         titleBar.style.cursor = 'move';
-        titleBar.style.userSelect = 'none';
+        titleBar.style.userSelect = 'none'; // Prevent text selection on title bar
     }
 
     addButton(buttonText, buttonAction) {
         const button = document.createElement('button');
         button.style.width = '100%';
         button.style.padding = '10px';
-        button.style.backgroundColor = '#1c1c1c';
-        button.style.color = '#ffffff';
+        button.style.backgroundColor = '#1c1c1c'; // Bright red background
+        button.style.color = '#ffffff'; // White text color
         button.style.border = 'none';
         button.style.borderRadius = '5px';
         button.style.cursor = 'pointer';
@@ -231,7 +233,7 @@ class UIManager {
         button.style.fontWeight = 'bold';
         button.style.fontSize = '16px';
         button.addEventListener('click', buttonAction);
-        button.classList.add('rainbow-animation');
+        button.classList.add('rainbow-animation'); // Add rainbow animation class
 
         const buttonTextSpan = document.createElement('span');
         buttonTextSpan.textContent = buttonText;
@@ -245,11 +247,11 @@ class UIManager {
     addLabel(labelText) {
         const label = document.createElement('h3');
         label.textContent = labelText;
-        label.style.color = '#ffffff';
+        label.style.color = '#ffffff'; // White text color
         label.style.marginBottom = '20px';
         label.style.fontSize = '18px';
         label.style.textAlign = 'center';
-        label.classList.add('rainbow-animation');
+        label.classList.add('rainbow-animation'); // Add rainbow animation class
 
         this.UIContext.appendChild(label);
 
@@ -276,8 +278,8 @@ class UIManager {
         input.style.marginBottom = '20px';
         input.style.borderRadius = '5px';
         input.addEventListener('input', valueChangeAction);
-        input.style.backgroundColor = '#0e0e0e';
-        input.classList.add('rainbow-animation');
+        input.style.backgroundColor = '#0e0e0e'; // White text color
+        input.classList.add('rainbow-animation'); // Add rainbow animation class
 
         this.UIContext.appendChild(input);
         return input;
@@ -303,10 +305,23 @@ class UIManager {
         return slider;
     }
 
+    addLogo() {
+        const logo = document.createElement('img');
+        logo.src = 'https://github.com/Snoofz/Hailware-Assets/blob/main/snowly-icon.png?raw=true';
+        logo.className = 'logo';
+        logo.alt = 'Logo';
+        logo.style.marginLeft = '35%';
+        logo.classList.add('hue-shift-animation');
+
+        this.UIContext.insertBefore(logo, this.UIContext.firstChild);
+
+        return logo;
+    }
+
     createTabMenu(tabs) {
         const tabContainer = document.createElement('div');
         tabContainer.style.display = 'flex';
-        tabContainer.style.borderBottom = '1px solid #cc0000';
+        tabContainer.style.borderBottom = '1px solid #cc0000'; // Bright red border
         tabContainer.style.marginBottom = '20px';
         tabContainer.classList.add('rainbow-animation')
 
@@ -317,13 +332,13 @@ class UIManager {
             tabButton.textContent = tab.title;
             tabButton.style.flex = '1';
             tabButton.style.padding = '10px';
-            tabButton.style.backgroundColor = '#1c1c1c';
-            tabButton.style.color = '#ffffff';
+            tabButton.style.backgroundColor = '#1c1c1c'; // Dark red background
+            tabButton.style.color = '#ffffff'; // White text color
             tabButton.style.border = 'none';
             tabButton.style.cursor = 'pointer';
             tabButton.style.fontWeight = 'bold';
             tabButton.style.fontSize = '16px';
-            tabButton.classList.add('rainbow-animation');
+            tabButton.classList.add('rainbow-animation'); // Add rainbow animation class
 
             tabButton.addEventListener('click', () => {
                 contentContainers.forEach((container, idx) => {
@@ -364,13 +379,13 @@ class UIManager {
             tabButton.textContent = tab.title;
             tabButton.style.flex = '1';
             tabButton.style.padding = '10px';
-            tabButton.style.backgroundColor = '#1c1c1c';
-            tabButton.style.color = '#ffffff';
+            tabButton.style.backgroundColor = '#1c1c1c'; // Dark red background
+            tabButton.style.color = '#ffffff'; // White text color
             tabButton.style.border = 'none';
             tabButton.style.cursor = 'pointer';
             tabButton.style.fontWeight = 'bold';
             tabButton.style.fontSize = '16px';
-            tabButton.classList.add('rainbow-animation');
+            tabButton.classList.add('rainbow-animation'); // Add rainbow animation class
 
             tabButton.addEventListener('click', () => {
                 contentContainers.forEach((container, idx) => {
@@ -406,7 +421,7 @@ class UIManager {
 
         const content = document.createElement('div');
         content.innerHTML = tabs[index].content;
-        content.style.color = '#ffffff';
+        content.style.color = '#ffffff'; // White text color
         content.style.fontSize = '16px';
         contentContainer.appendChild(content);
 
@@ -430,8 +445,8 @@ class UITab {
         const button = document.createElement('button');
         button.style.width = '100%';
         button.style.padding = '10px';
-        button.style.backgroundColor = '#1c1c1c';
-        button.style.color = '#ffffff';
+        button.style.backgroundColor = '#1c1c1c'; // Bright red background
+        button.style.color = '#ffffff'; // White text color
         button.style.border = 'none';
         button.style.borderRadius = '5px';
         button.style.cursor = 'pointer';
@@ -439,7 +454,7 @@ class UITab {
         button.style.fontWeight = 'bold';
         button.style.fontSize = '16px';
         button.addEventListener('click', buttonAction);
-        button.classList.add('rainbow-animation');
+        button.classList.add('rainbow-animation'); // Add rainbow animation class
 
         const buttonTextSpan = document.createElement('span');
         buttonTextSpan.textContent = buttonText;
@@ -453,11 +468,11 @@ class UITab {
     addLabel(labelText) {
         const label = document.createElement('h3');
         label.innerHTML = labelText;
-        label.style.color = '#ffffff';
+        label.style.color = '#ffffff'; // White text color
         label.style.marginBottom = '20px';
         label.style.fontSize = '18px';
         label.style.textAlign = 'center';
-        label.classList.add('rainbow-animation');
+        label.classList.add('rainbow-animation'); // Add rainbow animation class
 
         this.contentContainer.appendChild(label);
 
@@ -473,8 +488,8 @@ class UITab {
         input.style.marginBottom = '20px';
         input.style.borderRadius = '5px';
         input.addEventListener('input', valueChangeAction);
-        input.style.backgroundColor = '#0e0e0e';
-        input.classList.add('rainbow-animation');
+        input.style.backgroundColor = '#0e0e0e'; // White text color
+        input.classList.add('rainbow-animation'); // Add rainbow animation class
 
         this.contentContainer.appendChild(input);
         return input;
@@ -535,6 +550,7 @@ function waitForUnityInstance(callback) {
         }
     }, 1000);
 }
+
 
 function SHA512(str) {
     function int64(msint_32, lsint_32) {
@@ -908,13 +924,57 @@ function dropWeapon(weaponName) {
     Crazygames.getUnityInstance().SendMessage('PlayerBody(Clone)', 'DropGun', GetWeapon(weaponName).weaponId);
 }
 
+function checkForPlayerBodyAsync() {
+    return new Promise((resolve) => {
+        const unityInstance = Crazygames.getUnityInstance();
 
+        const interval = setInterval(() => {
+            try {
+                unityInstance.SendMessage('PlayerBody(Clone)', 'get_currentKillsInKillstreak');
+                clearInterval(interval);
+                resolve();
+            } catch (error) {
+            }
+        }, 500);
+    });
+};
+
+function loadScript(url) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script ${url}`));
+        document.head.appendChild(script);
+    });
+}
 
 waitForUnityInstance(() => {
     function appendCustomScrollbarStyles() {
         const style = document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = `
+        @keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.logo {
+  animation: rotate 10s linear infinite
+  width: 100px;
+  height: 100px;
+}
+@keyframes hue-shift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+.hue-shift-animation {
+    animation: hue-shift 10s linear infinite; /* Adjust timing and animation as needed */
+}
             /* Custom rainbow  */
 @keyframes rainbow {
     0% { color: #ff0000; scrollbar-color: #ff0000 #0e0e0e; border-bottom-color: #ff0000; }
@@ -963,6 +1023,9 @@ waitForUnityInstance(() => {
     appendCustomScrollbarStyles();
     uiManager.createNotification('Hailware', 'Hailware was successfully loaded!');
     if (window.location.href.includes("bullet-force-multiplayer") || window.location.href.includes("localhost")) {
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.36/Tone.min.js')
+        .then(() => {
+            console.log('Tone.js loaded');
         Log.welcome("Welcome to Hailware");
         Log.tool("Cheat Menu made by Foonix (Draggable Window fixed by Yellowberry)");
 
@@ -976,10 +1039,11 @@ waitForUnityInstance(() => {
 
         Log.tool("Pre-loading cheats...");
         Log.tool("Cheats were pre-loaded!");
-
         let mainMenu = uiManager.createMenu("epicUI", "Hailware Web", "400px", "500px");
         uiManager.makeDraggable(mainMenu);
+        let logo = uiManager.addLogo("https://github.com/Snoofz/Hailware-Assets/blob/main/snowly-icon.png?raw=true");
         let uwu = uiManager.addLabel(`Please log in to your hailware account to continue!`);
+        console.log("Okay!");
 
         let usernameField2 = uiManager.addTextInput("Username", () => {
             Log.info('Text input changed');
@@ -1033,6 +1097,10 @@ waitForUnityInstance(() => {
                 content: '<p>Balls idk</p>'
             }
         ]);
+
+        // Initiate an empty function
+
+        // It should drop this weapon for you, you just have to press "F" to pick up the weapon
 
         let spoofName = "";
         let contentContainer = tabs.Containers;
@@ -1253,6 +1321,12 @@ waitForUnityInstance(() => {
                 let unityInstance = Crazygames.getUnityInstance();
                 unityInstance.SendMessage(
                     'PlayerBody(Clone)',
+                    'updateUsername',
+                    `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`
+                );
+                unityInstance.SendMessage('PlayerBody(Clone)', 'set_NickName', `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`);
+                unityInstance.SendMessage(
+                    'PlayerBody(Clone)',
                     'UsernameChanged',
                     `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`
                 );
@@ -1312,8 +1386,6 @@ waitForUnityInstance(() => {
                     uiManager.addLabel(`Login failed! Please register first!`);
                 }
         });
-
-        loginStatus = tabs[1].uiTab.addLabel('N/A');
 
         let weapons = {
             "0": {
@@ -1633,6 +1705,7 @@ waitForUnityInstance(() => {
                 clearInterval(tmpInterval);
             }
         }
+    });
     }
 }, 2000);
 
