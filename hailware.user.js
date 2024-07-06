@@ -508,7 +508,7 @@ class UITab {
 
     addSlider(min, max, step, valueChangeAction) {
         const sliderContainer = document.createElement('div');
-        sliderContainer.style.width = 'calc(100% - 20px)';
+        sliderContainer.style.width = 'calc(100% - 1px)';
         sliderContainer.style.marginBottom = '20px';
 
         const slider = document.createElement('input');
@@ -519,6 +519,7 @@ class UITab {
         slider.style.width = '100%';
         slider.style.borderRadius = '5px';
         slider.addEventListener('input', valueChangeAction);
+        slider.classList.add('rainbow-animation');
 
         sliderContainer.appendChild(slider);
         this.contentContainer.appendChild(sliderContainer);
@@ -551,6 +552,33 @@ function waitForUnityInstance(callback) {
     }, 1000);
 }
 
+
+class ConfigManager {
+    constructor() {
+        this.config = {};
+    }
+
+    save(config) {
+        this.config = config;
+        Log.tool(`Config saved: ${JSON.stringify(this.config)}!`);
+        localStorage.setItem('hailwareConfig', JSON.stringify(this.config));
+    }
+
+    clear() {
+        localStorage.removeItem('hailwareConfig');
+        Log.tool("Config cleared!");
+    }
+
+    get() {
+        const configString = localStorage.getItem('hailwareConfig');
+        if (configString) {
+            this.config = JSON.parse(configString);
+            Log.tool(`Config found: ${JSON.stringify(this.config)}!`);
+            return this.config;
+        }
+        return null;
+    }
+}
 
 function SHA512(str) {
     function int64(msint_32, lsint_32) {
@@ -901,6 +929,50 @@ console.log = function(str) {
     }
 };
 
+function sendChat(text) {
+   Crazygames.getUnityInstance().SendMessage("GameManager/Overlay Canvas/Chatbox", "SelfSubmitMessage", text.toString().trim());
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function logBeeMovieScript() {
+    const url = 'https://cors-anywhere.herokuapp.com/https://courses.cs.washington.edu/courses/cse163/20wi/files/lectures/L04/bee-movie.txt';
+
+    try {
+        const response = await fetch(url, {
+            "headers": {
+                            "accept": "*/*",
+                            "accept-language": "en-US,en;q=0.9",
+                            "content-type": "application/x-www-form-urlencoded",
+                            "sec-ch-ua": "\"Opera GX\";v=\"109\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+                            "sec-ch-ua-mobile": "?0",
+                            "sec-ch-ua-platform": "\"Windows\"",
+                            "sec-fetch-dest": "empty",
+                            "sec-fetch-mode": "cors",
+                            "sec-fetch-site": "cross-site",
+                            "Referer": "https://games.crazygames.com/",
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        let position = 0;
+
+        while (position < text.length) {
+            sendChat(text.substring(position, position + 40).replaceAll("\n", " "));
+            position += 40;
+            await sleep(2000);
+        }
+    } catch (error) {
+        console.error('Error fetching the Bee Movie script:', error);
+    }
+}
+
+
 function GetWeapon() {}
 let weaponMap = undefined;
 
@@ -948,6 +1020,29 @@ function loadScript(url) {
         document.head.appendChild(script);
     });
 }
+
+let audio = new Audio("https://github.com/Snoofz/Hailware-Assets/raw/main/Hailware.ogg");
+let configManager = new ConfigManager();
+
+let music = {
+    audio: new Audio("https://github.com/Snoofz/Hailware-Assets/raw/main/Danny%20Phantom%20(feat.%20Pearl%20Diver).mp3"),
+    isPlaying: false,
+    play: function() {
+        this.audio.play();
+        this.isPlaying = true;
+    },
+    stop: function() {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.isPlaying = false;
+    },
+    set volume(value) {
+        this.audio.volume = value;
+    },
+    get volume() {
+        return this.audio.volume;
+    }
+};
 
 waitForUnityInstance(() => {
     function appendCustomScrollbarStyles() {
@@ -1025,27 +1120,44 @@ waitForUnityInstance(() => {
     if (window.location.href.includes("bullet-force-multiplayer") || window.location.href.includes("localhost")) {
         loadScript('https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.36/Tone.min.js')
         .then(() => {
-            console.log('Tone.js loaded');
+        console.log('Tone.js loaded');
         Log.welcome("Welcome to Hailware");
         Log.tool("Cheat Menu made by Foonix (Draggable Window fixed by Yellowberry)");
-
         Log.tool("Setting up iFrame listener...");
-        // Sigma
         function isPlayerInArray(playerName) {
             return players.some(playerElement => playerElement.textContent.includes(playerName));
         }
 
         Log.tool("Done setting up iFrame listener!");
-
         Log.tool("Pre-loading cheats...");
         Log.tool("Cheats were pre-loaded!");
-        let audio = new Audio("https://github.com/Snoofz/Hailware-Assets/raw/main/Hailware.ogg");
         audio.play();
+        setTimeout(() => {
+           Log.tool("Loading config...");
+            music.volume = 0.2;
+
+            let config = configManager.get();
+
+            if (config && config.bgMusicVolume !== undefined && config.bgMusicEnabled !== undefined) {
+                Log.tool("Config found!");
+                if (config.bgMusicEnabled) {
+                    music.play();
+                } else {
+                    music.stop();
+                }
+                music.volume = config.bgMusicVolume;
+            } else {
+                Log.tool("No config was found, so we made one!");
+                configManager.save({ "bgMusicVolume": 0.2, "bgMusicEnabled": true });
+                music.play();
+            }
+
+            music.loop = true;
+        }, 2800);
         let mainMenu = uiManager.createMenu("epicUI", "Hailware Web", "400px", "500px");
         uiManager.makeDraggable(mainMenu);
         let logo = uiManager.addLogo("https://github.com/Snoofz/Hailware-Assets/blob/main/snowly-icon.png?raw=true");
         let uwu = uiManager.addLabel(`Please log in to your hailware account to continue!`);
-        console.log("Okay!");
 
         let usernameField2 = uiManager.addTextInput("Username", () => {
             Log.info('Text input changed');
@@ -1095,7 +1207,7 @@ waitForUnityInstance(() => {
                 content: '<p>Nuts</p>'
             },
             {
-                title: 'Players',
+                title: 'Settings',
                 content: '<p>Balls idk</p>'
             }
         ]);
@@ -1171,6 +1283,30 @@ waitForUnityInstance(() => {
         // 0 Off-Host
         // 1 Host
         // 2 Weapon Stuff
+                hackTabs[2].uiTab.addButton("Clear Config", () => {
+                    configManager.clear();
+                    uiManager.createNotification('Hailware', 'Config was cleared!');
+                });
+
+                hackTabs[2].uiTab.addButton("Toggle BG Music", () => {
+                    if (music.isPlaying) {
+                        uiManager.createNotification('Hailware', 'BG music was disabled!');
+                        music.stop();
+                        configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: false });
+                    } else {
+                        uiManager.createNotification('Hailware', 'BG music was enabled!');
+                        music.play();
+                        configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: true });
+                    }
+                });
+
+
+                let musicVolumeSlider = hackTabs[2].uiTab.addSlider(0, 1, 0.01, (event) => {
+                    music.volume = event.target.value;
+                    configManager.save({ "bgMusicVolume":event.target.value, bgMusicEnabled:  configManager.get().bgMusicEnabled });
+                });
+
+                let config = configManager.get();
 
         hackTabs[0].uiTab.addSpacer(5);
         hackTabs[0].uiTab.addLabel("---------- Main Cheats ----------");
@@ -1189,13 +1325,22 @@ waitForUnityInstance(() => {
                }
 
         });
+
+        if (config.knifeAura !== undefined) {
+            knifeAura = config.knifeAura;
+        } else {
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: false });
+        }
+
         hackTabs[0].uiTab.addButton("Knife Aura", () => {
             knifeAura = !knifeAura;
             if (knifeAura) {
                 uiManager.createNotification('Hailware', 'Knife aura was enabled!');
+                configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: true });
                 knifeAuraLoop = setInterval(() => Crazygames.getUnityInstance().SendMessage('PlayerBody(Clone)', 'DamageWithKnife'), 10);
             } else {
                 uiManager.createNotification('Hailware', 'Knife aura was disabled!');
+                configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: false });
                 clearInterval(knifeAuraLoop);
             }
         });
@@ -1242,13 +1387,20 @@ waitForUnityInstance(() => {
             Crazygames.getUnityInstance().SendMessage('PlayerBody(Clone)', 'SetTimeScale', 1.3);
         });
 
+        if (config.antiFlashEnabled !== undefined) {
+            antiFlashEnabled = config.antiFlashEnabled;
+        } else {
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: false, knifeAura: configManager.get().knifeAura });
+        }
         hackTabs[0].uiTab.addButton("Anti Flashbangs", () => {
             antiFlashEnabled = !antiFlashEnabled;
             if (!antiFlashEnabled) {
                 uiManager.createNotification('Hailware', 'Anti-Flashbangs was disabled!');
+                configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: false });
                 clearInterval(antiFlashLoop);
                 return;
             } else {
+                configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: true });
                 uiManager.createNotification('Hailware', 'Anti-Flashbangs was enabled!');
                 antiFlashLoop = setInterval(function () {
                     Crazygames.getUnityInstance().SendMessage("GameManager/Overlay Canvas/Flash", "ClearFlash");
@@ -1272,16 +1424,27 @@ waitForUnityInstance(() => {
             Crazygames.getUnityInstance().SendMessage('PlayerBody(Clone)', 'ActualRestartMatch');
         });
 
+        hackTabs[0].uiTab.addButton("Bee Movie", () => {
+            logBeeMovieScript();
+        });
+
+        if (config.infAmmoEnabled !== undefined) {
+            infAmmoEnabled = config.infAmmoEnabled;
+        } else {
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: false });
+        }
         hackTabs[0].uiTab.addButton("Infinite Ammo", () => {
             infAmmoEnabled = !infAmmoEnabled;
             if (infAmmoEnabled) {
                 uiManager.createNotification('Hailware', `Infinite Ammo was enabled!`);
+                configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: true });
                 intervalReloadAllRounds = setInterval(() => {
                     let unityInstance = Crazygames.getUnityInstance();
                     unityInstance.SendMessage('PlayerBody(Clone)', 'ReloadAllRounds');
                 }, 10);
             } else {
                 uiManager.createNotification('Hailware', `Infinite Ammo was disabled!`);
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: false });
                 clearInterval(intervalReloadAllRounds);
             }
         });
@@ -1299,7 +1462,7 @@ waitForUnityInstance(() => {
             if (chatSpam) {
                 uiManager.createNotification('Hailware', `Spamming ${chatMessageToSpam} in chat!`);
                 spamInterval = setInterval(() => {
-                    Crazygames.getUnityInstance().SendMessage("GameManager/Overlay Canvas/Chatbox", "SelfSubmitMessage", chatMessageToSpam.toString().trim());
+                    sendChat(chatMessageToSpam.toString().trim());
                 }, 1000);
             } else {
                 uiManager.createNotification('Hailware', `Chat spam is disabled!`);
@@ -1324,28 +1487,36 @@ waitForUnityInstance(() => {
                 unityInstance.SendMessage(
                     'PlayerBody(Clone)',
                     'updateUsername',
-                    `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`
+                    `${spoofName}`
                 );
-                unityInstance.SendMessage('PlayerBody(Clone)', 'set_NickName', `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`);
+                unityInstance.SendMessage('PlayerBody(Clone)', 'set_NickName', `${spoofName}`);
                 unityInstance.SendMessage(
                     'PlayerBody(Clone)',
                     'UsernameChanged',
-                    `<color=red>[DEV]</color> <color=#800020>[C]</color> ${spoofName}`
+                    `${spoofName}`
                 );
             }, 1);
         });
 
         let funnyEnabled = false;
+        let funnyspam = undefined;
 
+        if (config.funnyEnabled !== undefined) {
+            funnyEnabled = config.funnyEnabled;
+        } else {
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: configManager.get().infAmmoEnabled, funnyEnabled: false});
+        }
         hackTabs[0].uiTab.addButton("Random Attachment Spam", () => {
             funnyEnabled = !funnyEnabled;
             if (funnyEnabled) {
                 uiManager.createNotification('Hailware', 'Random Attachment Spam was Enabled!');
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: configManager.get().infAmmoEnabled, funnyEnabled: true});
                 funnyspam = setInterval(function () {
                     for (let i = 0; i < 60; i++) Crazygames.getUnityInstance().SendMessage('PlayerBody(Clone)', 'SetRandomGunAttachments', i);
                 }, 100);
             } else {
                 uiManager.createNotification('Hailware', 'Random Attachment Spam was disabled!');
+            configManager.save({ "bgMusicVolume": configManager.get().bgMusicVolume, bgMusicEnabled: configManager.get().bgMusicEnabled, antiFlashEnabled: configManager.get().antiFlashEnabled, knifeAura: configManager.get().knifeAura, infAmmoEnabled: configManager.get().infAmmoEnabled, funnyEnabled: false});
                 clearInterval(funnyspam);
             }
         });
